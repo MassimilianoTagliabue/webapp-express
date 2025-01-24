@@ -1,4 +1,5 @@
 const connection = require("../data/dbConnection")
+const errorHandler = require("../middleware/errorHandler")
 
 //index
 const index = (req, res, next) => {
@@ -6,11 +7,10 @@ const index = (req, res, next) => {
     const sql = "SELECT * FROM movies";
 
     connection.query(sql, (err, movies) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Errore interno del server",
-            });
-        } else {
+        if(err){
+            return next(new Error(err.message))
+        }
+         else {
             return res.status(200).json({
                 status: "success",
                 data: movies,
@@ -34,20 +34,19 @@ const show = (req, res, next) => {
 
     connection.query(sql, [id], (err, movies) => {
         if (err) {
-            return res.status(500).json({
-                message: "Errore interno del server",
-            });
+            return next(new Error(err.message))
+
         } else if (movies.length === 0) {
             return res.status(404).json({
                 message: "Film non trovato",
             })
         }
         else {
+
             connection.query(sqlReviews, [id], (err, reviews) => {
                 if (err) {
-                    return res.status(500).json({
-                        message: "Errore interno del server",
-                    });
+                    return next(new Error(err.message));
+
                 } else {
                     return res.status(200).json({
                         status: "success",
