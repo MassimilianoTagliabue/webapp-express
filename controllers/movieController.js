@@ -106,8 +106,35 @@ const storeReview = (req, res, next) => {
 }
 
 
+const storeMovie = (req,res,next) =>{
+
+    const imageName = req.file.name
+    const {title, director, genre, release_year, abstract} = req.body;
+    
+
+     const newMovieSql = `
+     INSERT INTO movies( title, director, genre, release_year, abstract, image)
+     VALUES (?, ?, ?, ?, ? ,?);
+      `;
+
+      connection.query(newMovieSql, [title, director, genre, release_year, abstract, imageName], (err,result) =>{
+         if(err) {
+             next(new Error(err.message));
+           }
+      
+           return res.status(201).json({
+             status: "success",
+             message: "Il film è stato salvato",
+           });
+        
+      })
+
+}
+
+
 module.exports = {
     index,
     show,
     storeReview,
+    storeMovie,
 };
