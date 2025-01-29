@@ -7,10 +7,10 @@ const index = (req, res, next) => {
     const sql = "SELECT * FROM movies";
 
     connection.query(sql, (err, movies) => {
-        if(err){
+        if (err) {
             return next(new Error(err.message))
         }
-         else {
+        else {
             return res.status(200).json({
                 status: "success",
                 data: movies,
@@ -61,7 +61,53 @@ const show = (req, res, next) => {
     });
 }
 
+
+const storeReview = (req, res, next) => {
+    const movieId = req.params.id;
+    const { name, vote, text } = req.body;
+    console.log("salvo libro", movieId);
+    console.log(name, vote, text);
+
+    //controllo che il film esiste
+    const movieSql = "SELECT * FROM movies WHERE id = ?";
+
+    connection.query(movieSql, [movieId], (err, result) => {
+        if (err) {
+            return next(new Error(err.message))
+        }
+        if(result.length === 0) {
+            return res.status(404).json({
+                status: "fail",
+                data: "film non trovato",
+            });
+        }
+    });
+
+
+
+    // Se è andato tutto bene e il film esiste, possiamo aggiungere la recensione
+    const sql = `
+    INSERT INTO reviews(movie_id, name, vote, text)
+    VALUES (?, ?, ?, ?);
+     `;
+
+    connection.query(sql, [movieId, name, vote, text], (err, result) => {
+
+        if (err) {
+            return next(new Error("query fallita"));
+        }
+
+        res.status(201).json({
+            status: "success",
+            message: "recensione aggiunta",
+        });
+    });
+
+}
+
+
 module.exports = {
     index,
     show,
+    storeReview,
 };
